@@ -108,7 +108,7 @@ function initShaders(gl)
     };
 }
 
-function initScene(gl, shader)
+function initScene(context, shader)
 {
     var cubeVertices = 
     [
@@ -123,6 +123,8 @@ function initScene(gl, shader)
         -1, 1, 1
     ];
 
+    var gl = context.gl;
+
     var vbo = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeVertices), gl.STATIC_DRAW);
@@ -135,7 +137,8 @@ function initScene(gl, shader)
     gl.enableVertexAttribArray(shader.vPosition);
 
     var projMatrix = new Float32Array(16);
-    glMatrix.mat4.ortho(projMatrix, -2, 2, -2, 2, 1, 5);
+    var ratio = context.width / context.height;
+    glMatrix.mat4.ortho(projMatrix, -2*ratio, 2*ratio, -2, 2, 1, 5);
     //glMatrix.mat4.perspective(projMatrix, 100*Math.PI/180, 4./3, .1, 2);
 
 	gl.useProgram(shader.program);
@@ -180,7 +183,7 @@ function initDemo()
     var gl = context.gl;
 
     shader = initShaders(context.gl);
-    initScene(context.gl, shader);
+    initScene(context, shader);
 
     draw(context.gl);
 }
