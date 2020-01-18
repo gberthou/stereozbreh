@@ -13,7 +13,7 @@ var fragmentShaderText =
 [
 "void main()",
 "{",
-"    gl_FragColor = vec4(gl_FragCoord.z * vec3(1., 1., 1.), 1.);",
+"    gl_FragColor = vec4((1. - gl_FragCoord.z) * vec3(1., 1., 1.), 1.);",
 "}"
 ].join("\n");
 
@@ -134,15 +134,11 @@ function initScene(gl, shader)
     gl.vertexAttribPointer(shader.vPosition, 3, gl.FLOAT, gl.FALSE, 3*Float32Array.BYTES_PER_ELEMENT, 0);
     gl.enableVertexAttribArray(shader.vPosition);
 
-    var viewMatrix = new Float32Array(16);
-    glMatrix.mat4.lookAt(viewMatrix, glMatrix.vec3.fromValues(0, -2, 1), glMatrix.vec3.fromValues(0, 0, 0), glMatrix.vec3.fromValues(0, 0, 1));
-
     var projMatrix = new Float32Array(16);
-    glMatrix.mat4.ortho(projMatrix, -2, 2, -2, 2, .1, 2);
+    glMatrix.mat4.ortho(projMatrix, -2, 2, -2, 2, 1, 5);
     //glMatrix.mat4.perspective(projMatrix, 100*Math.PI/180, 4./3, .1, 2);
 
 	gl.useProgram(shader.program);
-    gl.uniformMatrix4fv(shader.vMview, false, viewMatrix);
     gl.uniformMatrix4fv(shader.vMproj, false, projMatrix);
 
     gl.enable(gl.DEPTH_TEST);
@@ -151,11 +147,31 @@ function initScene(gl, shader)
 
 function draw(gl)
 {
-	gl.clearColor(0, 0, 0, 1.0);
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    const RADIUS = 3.0;
+    const ANGLE_MAX_RAD = Math.PI/4.;
 
-    //gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-    gl.drawElements(gl.TRIANGLES, cubeIndices.length, gl.UNSIGNED_SHORT, 0);
+    var z = 1.0;
+    var theta = -ANGLE_MAX_RAD;
+    
+
+    var _draw = function(dt) {
+        var x = RADIUS * Math.cos(theta);
+        var y = -RADIUS * Math.sin(theta);
+        theta += .01;
+
+        var viewMatrix = new Float32Array(16);
+        glMatrix.mat4.lookAt(viewMatrix, glMatrix.vec3.fromValues(x, y, z), glMatrix.vec3.fromValues(0, 0, 0), glMatrix.vec3.fromValues(0, 0, 1));
+        gl.uniformMatrix4fv(shader.vMview, false, viewMatrix);
+
+        gl.clearColor(0, 0, 0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        gl.drawElements(gl.TRIANGLES, cubeIndices.length, gl.UNSIGNED_SHORT, 0);
+
+        requestAnimationFrame(_draw);
+    };
+
+    requestAnimationFrame(_draw);
 }
 
 function initDemo()
@@ -167,4 +183,4 @@ function initDemo()
     initScene(context.gl, shader);
 
     draw(context.gl);
-};
+}
