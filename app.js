@@ -148,33 +148,42 @@ function initScene(context, shader)
     gl.depthFunc(gl.LEQUAL);
 }
 
-function draw(gl)
+function drawDepth(context, shader, x, y, z)
+{
+    var gl = context.gl;
+
+    var viewMatrix = new Float32Array(16);
+    glMatrix.mat4.lookAt(viewMatrix, glMatrix.vec3.fromValues(x, y, z), glMatrix.vec3.fromValues(0, 0, 0), glMatrix.vec3.fromValues(0, 0, 1));
+    gl.uniformMatrix4fv(shader.vMview, false, viewMatrix);
+
+    gl.clearColor(0, 0, 0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.drawElements(gl.TRIANGLES, cubeIndices.length, gl.UNSIGNED_SHORT, 0);
+
+    var pixels = new Uint8Array(4 * context.width * context.height);
+    gl.readPixels(0, 0, context.width, context.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+    return pixels;
+}
+
+function draw(context, shader)
 {
     const RADIUS = 3.0;
     const ANGLE_MAX_RAD = Math.PI/4.;
+    const N = 5;
 
     var z = 1.0;
-    var theta = -ANGLE_MAX_RAD;
-    
 
-    var _draw = function(dt) {
+    for(var i = 0; i < N; ++i)
+    {
+        var theta = -ANGLE_MAX_RAD + 2*i*ANGLE_MAX_RAD/(N-1);
         var x = RADIUS * Math.cos(theta);
         var y = -RADIUS * Math.sin(theta);
-        theta += .01;
 
-        var viewMatrix = new Float32Array(16);
-        glMatrix.mat4.lookAt(viewMatrix, glMatrix.vec3.fromValues(x, y, z), glMatrix.vec3.fromValues(0, 0, 0), glMatrix.vec3.fromValues(0, 0, 1));
-        gl.uniformMatrix4fv(shader.vMview, false, viewMatrix);
-
-        gl.clearColor(0, 0, 0, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        gl.drawElements(gl.TRIANGLES, cubeIndices.length, gl.UNSIGNED_SHORT, 0);
-
-        requestAnimationFrame(_draw);
-    };
-
-    requestAnimationFrame(_draw);
+        var pixels = drawDepth(context, shader, x, y, z);
+        console.log(pixels);
+    }
 }
 
 function initDemo()
@@ -185,5 +194,5 @@ function initDemo()
     shader = initShaders(context.gl);
     initScene(context, shader);
 
-    draw(context.gl);
+    draw(context, shader);
 }
