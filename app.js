@@ -182,8 +182,10 @@ function initDemo()
     var context = initGL();
     var gl = context.gl;
 
-    shader = initShaders(context.gl);
-    initScene(context, shader);
+    //shader = initShaders(context.gl);
+    //initScene(context, shader);
 
-    draw(context.gl);
+    //draw(context.gl);
+
+    voronoi_draw(gl, 800/32, 600/30);
 }
