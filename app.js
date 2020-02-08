@@ -209,9 +209,20 @@ function generate_depth_textures(context, fb_width, fb_height)
     return textures;
 }
 
+function fast_draw_texture(context, texture)
+{
+    const gl = context.gl;
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    displayTexture(gl, texture, context.width, context.height);
+}
+
 function initDemo()
 {
     const context = initGL();
+    const gl = context.gl;
 
     const fb_width = 256;
     const fb_height = 256;
@@ -225,4 +236,5 @@ function initDemo()
     context.gl.viewport(0, 0, context.width, context.height);
     
     const pattern_texture = voronoi_draw(context.gl, pattern_width, pattern_height, 8, 16);
+    fast_draw_texture(context, pattern_texture, pattern_texture);
 }

@@ -1,3 +1,12 @@
+const VCODE_SCREEN = `
+attribute vec4 aVertexPosition;
+
+void main()
+{
+  gl_Position =  vec4(aVertexPosition.xy, 0., 1.);
+}
+`;
+
 function loadShaders(gl, vcode, fcode)
 {
 	const vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -71,52 +80,38 @@ function createFramebuffer(gl, texture)
     return fb;
 }
 
-/*
 function displayTexture(gl, texture, width, height)
 {
-    const dbg_vertexCode = `
-    attribute vec2 position;
+    const FCODE_TEXTURE = function (width, height) {
+        return `
+        uniform sampler2D uTexture;
 
-    void main()
-    {
-        gl_Position = vec4(position.xy, 0., 1.);
-    }
-    `;
+        void main()
+        {
+            gl_FragColor = texture2D(uTexture, gl_FragCoord.xy / vec2(` + width.toFixed(6) + `, ` + height.toFixed(6) + `));
+        }
+        `;
+    };
+    const program = loadShaders(gl, VCODE_SCREEN, FCODE_TEXTURE(width, height));
+    const aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
+    const uTexture = gl.getUniformLocation(program, "uTexture");
+    const buffer = create_screen_buffer(gl);
 
-    const dbg_fragmentCode = `
-    void main()
-    {
-        gl_FragColor = vec4(1., 0., 0., 1.);
-    }
-    `;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, width, height);
 
-    const vertices = [
-        1.0, 1.0,
-        -1.0, 1.0,
-        1.0, -1.0,
-        -1.0, -1.0
-    ];
+    gl.useProgram(program);
 
-    const program = loadShaders(gl, dbg_vertexCode, dbg_fragmentCode);
-    const vPosition = gl.getAttribLocation(program, "position");
+    gl.uniform1i(uTexture, texture);
 
-    const vbo = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.disable(gl.DEPTH_TEST);
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
-    gl.clearColor(0.0, 1.0, 0.0, 1.0);
-    gl.clearDepth(1.0);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
+    // Actually draw
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.vertexAttribPointer(aVertexPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(aVertexPosition);
 
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vPosition);
-
-	gl.useProgram(program);
-    gl.drawArrays(gl.GL_TRIANGLE_STRIP, 0, 4);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
-*/
-

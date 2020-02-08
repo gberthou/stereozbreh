@@ -71,23 +71,15 @@ function voronoi_draw(gl, width, height, px_per_x, px_per_y)
 {
     const nodes_x = width / px_per_x;
     const nodes_y = height / px_per_y;
-    const vcode = `
-    attribute vec4 aVertexPosition;
-
-    void main()
-    {
-      gl_Position =  vec4(aVertexPosition.xy, 0., 1.);
-    }
-    `;
     const fcode = voronoi_fragment(nodes_x, nodes_y);
-    const program = loadShaders(gl, vcode, fcode);
+    const program = loadShaders(gl, VCODE_SCREEN, fcode);
 
     const aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
     const uDimensions     = gl.getUniformLocation(program, "uDimensions");
     const uNodes          = gl.getUniformLocation(program, "uNodes");
     const uColors         = gl.getUniformLocation(program, "uColors");
 
-    const buffer = create_screen_buffer(gl)
+    const buffer = create_screen_buffer(gl);
 
     const nodes = voronoi_nodes(nodes_x, nodes_y);
     const colors = voronoi_colors(nodes_x, nodes_y);
