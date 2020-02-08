@@ -39,6 +39,22 @@ var cubeIndices =
     3, 6, 7
 ];
 
+function createTexture(gl, width, height)
+{
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    return tex;
+}
+
+function createFramebuffer(gl, texture)
+{
+    const fb = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+    return fb;
+}
+
 function initGL()
 {
 	var canvas = document.getElementById("game-surface");
@@ -161,29 +177,42 @@ function drawDepth(context, shader, x, y, z)
 
     gl.drawElements(gl.TRIANGLES, cubeIndices.length, gl.UNSIGNED_SHORT, 0);
 
-    var pixels = new Uint8Array(4 * context.width * context.height);
-    gl.readPixels(0, 0, context.width, context.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    //var pixels = new Uint8Array(4 * context.width * context.height);
+    //gl.readPixels(0, 0, context.width, context.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
-    return pixels;
+    //return pixels;
 }
 
-function draw(context, shader)
+function draw(context, shader, fb_width, fb_height)
 {
     const RADIUS = 3.0;
     const ANGLE_MAX_RAD = Math.PI/4.;
     const N = 5;
+    const Z = 1.0;
 
-    var z = 1.0;
+    var textures = [];
 
     for(var i = 0; i < N; ++i)
     {
-        var theta = -ANGLE_MAX_RAD + 2*i*ANGLE_MAX_RAD/(N-1);
-        var x = RADIUS * Math.cos(theta);
-        var y = -RADIUS * Math.sin(theta);
+        const theta = -ANGLE_MAX_RAD + 2*i*ANGLE_MAX_RAD/(N-1);
+        const x = RADIUS * Math.cos(theta);
+        const y = -RADIUS * Math.sin(theta);
 
-        var pixels = drawDepth(context, shader, x, y, z);
-        console.log(pixels);
+        const fb_tex = createTexture(context.gl, fb_width, fb_height);
+        const fb     = createFramebuffer(context.gl, fb_tex);
+
+        textures.push(fb_tex);
+
+        context.gl.bindFramebuffer(context.gl.FRAMEBUFFER, fb);
+        context.gl.viewport(0, 0, fb_width, fb_height);
+
+        drawDepth(context, shader, x, y, Z);
+
+        //var pixels = drawDepth(context, shader, x, y, Z);
+        //console.log(pixels);
     }
+
+    return textures;
 }
 
 function initDemo()
@@ -191,8 +220,12 @@ function initDemo()
     var context = initGL();
     var gl = context.gl;
 
+    const fb_width = 256;
+    const fb_height = 256;
+
     shader = initShaders(context.gl);
     initScene(context, shader);
 
-    draw(context, shader);
+    const textures = draw(context, shader, fb_width, fb_height);
+    console.log(textures);
 }
