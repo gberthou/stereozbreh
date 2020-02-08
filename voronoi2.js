@@ -1,6 +1,3 @@
-const WIDTH = 800;
-const HEIGHT = 600;
-
 function voronoi_fragment(width, height)
 {
     const amount = width * height;
@@ -70,8 +67,10 @@ function voronoi_colors(width, height)
     return colors;
 }
 
-function voronoi_draw(gl, width, height)
+function voronoi_draw(gl, width, height, px_per_x, px_per_y)
 {
+    const nodes_x = width / px_per_x;
+    const nodes_y = height / px_per_y;
     const vcode = `
     attribute vec4 aVertexPosition;
 
@@ -80,7 +79,7 @@ function voronoi_draw(gl, width, height)
       gl_Position =  vec4(aVertexPosition.xy, 0., 1.);
     }
     `;
-    const fcode = voronoi_fragment(width, height);
+    const fcode = voronoi_fragment(nodes_x, nodes_y);
     const program = loadShaders(gl, vcode, fcode);
 
     const aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
@@ -90,11 +89,17 @@ function voronoi_draw(gl, width, height)
 
     const buffer = create_screen_buffer(gl)
 
-    const nodes = voronoi_nodes(width, height);
-    const colors = voronoi_colors(width, height);
+    const nodes = voronoi_nodes(nodes_x, nodes_y);
+    const colors = voronoi_colors(nodes_x, nodes_y);
+
+    const texture = createTexture(gl, width, height);
+    const fb      = createFramebuffer(gl, texture);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.viewport(0, 0, width, height);
 
     gl.useProgram(program);
-    gl.uniform2f(uDimensions, WIDTH, HEIGHT);
+    gl.uniform2f(uDimensions, width, height);
     gl.uniform2fv(uNodes, nodes);
     gl.uniform3fv(uColors, colors);
 
@@ -108,4 +113,6 @@ function voronoi_draw(gl, width, height)
     gl.enableVertexAttribArray(aVertexPosition);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    return texture;
 }

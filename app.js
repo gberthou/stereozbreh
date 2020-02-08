@@ -224,5 +224,5 @@ function initDemo()
     context.gl.bindFramebuffer(context.gl.FRAMEBUFFER, null);
     context.gl.viewport(0, 0, context.width, context.height);
     
-    voronoi_draw(context.gl, pattern_width / 8, pattern_height / 16);
+    const pattern_texture = voronoi_draw(context.gl, pattern_width, pattern_height, 8, 16);
 }
