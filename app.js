@@ -215,17 +215,31 @@ function draw(context, shader, fb_width, fb_height)
     return textures;
 }
 
-function initDemo()
+function generate_depth_textures(context, fb_width, fb_height)
 {
-    var context = initGL();
-    var gl = context.gl;
-
-    const fb_width = 256;
-    const fb_height = 256;
-
-    shader = initShaders(context.gl);
+    const shader = initShaders(context.gl);
     initScene(context, shader);
 
     const textures = draw(context, shader, fb_width, fb_height);
     console.log(textures);
+
+    return textures;
+}
+
+function initDemo()
+{
+    const context = initGL();
+
+    const fb_width = 256;
+    const fb_height = 256;
+
+    const pattern_width = 256;
+    const pattern_height = 600;
+
+    const textures = generate_depth_textures(context, fb_width, fb_height);
+
+    context.gl.bindFramebuffer(context.gl.FRAMEBUFFER, null);
+    context.gl.viewport(0, 0, context.width, context.height);
+    
+    voronoi_draw(context.gl, pattern_width / 8, pattern_height / 16);
 }
