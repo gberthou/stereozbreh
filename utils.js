@@ -55,6 +55,22 @@ function create_screen_buffer(gl)
     return buffer;
 }
 
+function createTexture(gl, width, height)
+{
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    return tex;
+}
+
+function createFramebuffer(gl, texture)
+{
+    const fb = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+    return fb;
+}
+
 /*
 function displayTexture(gl, texture, width, height)
 {

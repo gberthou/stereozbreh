@@ -1,4 +1,4 @@
-var vertexShaderText = 
+const vertexShaderText = 
 [
 "attribute vec3 position;",
 "uniform mat4 mview;",
@@ -9,7 +9,7 @@ var vertexShaderText =
 "}"
 ].join("\n");
 
-var fragmentShaderText =
+const fragmentShaderText =
 [
 "void main()",
 "{",
@@ -17,8 +17,7 @@ var fragmentShaderText =
 "}"
 ].join("\n");
 
-
-var cubeIndices =
+const cubeIndices =
 [
     0, 1, 2,
     0, 2, 3,
@@ -39,25 +38,9 @@ var cubeIndices =
     3, 6, 7
 ];
 
-function createTexture(gl, width, height)
-{
-    const tex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    return tex;
-}
-
-function createFramebuffer(gl, texture)
-{
-    const fb = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-    return fb;
-}
-
 function initGL()
 {
-	var canvas = document.getElementById("game-surface");
+	const canvas = document.getElementById("game-surface");
 	var _gl = canvas.getContext("webgl");
 
 	if (!_gl)
@@ -80,8 +63,8 @@ function initGL()
 
 function initShaders(gl)
 {
-	var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-	var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+	const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+	const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 
 	gl.shaderSource(vertexShader, vertexShaderText);
 	gl.shaderSource(fragmentShader, fragmentShaderText);
@@ -100,7 +83,7 @@ function initShaders(gl)
 		return;
 	}
 
-	var _program = gl.createProgram();
+	const _program = gl.createProgram();
 	gl.attachShader(_program, vertexShader);
 	gl.attachShader(_program, fragmentShader);
 	gl.linkProgram(_program);
@@ -126,7 +109,7 @@ function initShaders(gl)
 
 function initScene(context, shader)
 {
-    var cubeVertices = 
+    const cubeVertices = 
     [
         -1, -1, -1,
         1, -1, -1,
@@ -139,13 +122,13 @@ function initScene(context, shader)
         -1, 1, 1
     ];
 
-    var gl = context.gl;
+    const gl = context.gl;
 
-    var vbo = gl.createBuffer();
+    const vbo = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeVertices), gl.STATIC_DRAW);
 
-    var ibo = gl.createBuffer();
+    const ibo = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), gl.STATIC_DRAW);
     
@@ -153,7 +136,7 @@ function initScene(context, shader)
     gl.enableVertexAttribArray(shader.vPosition);
 
     var projMatrix = new Float32Array(16);
-    var ratio = context.width / context.height;
+    const ratio = context.width / context.height;
     glMatrix.mat4.ortho(projMatrix, -2*ratio, 2*ratio, -2, 2, 1, 5);
     //glMatrix.mat4.perspective(projMatrix, 100*Math.PI/180, 4./3, .1, 2);
 
@@ -166,7 +149,7 @@ function initScene(context, shader)
 
 function drawDepth(context, shader, x, y, z)
 {
-    var gl = context.gl;
+    const gl = context.gl;
 
     var viewMatrix = new Float32Array(16);
     glMatrix.mat4.lookAt(viewMatrix, glMatrix.vec3.fromValues(x, y, z), glMatrix.vec3.fromValues(0, 0, 0), glMatrix.vec3.fromValues(0, 0, 1));
