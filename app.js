@@ -236,7 +236,7 @@ function initDemo()
     context.gl.viewport(0, 0, context.width, context.height);
     
     const pattern_texture = voronoi_draw(context.gl, pattern_width, pattern_height, 16, 32);
-    //fast_draw_texture(context, pattern_texture, pattern_texture);
+    fast_draw_texture(context, textures[0]);
 
-    stereo(gl, context.width, context.height, pattern_texture, textures);
+    //stereo(gl, context.width, context.height, pattern_texture, textures);
 }

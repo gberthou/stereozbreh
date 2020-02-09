@@ -106,8 +106,10 @@ function displayTexture(gl, texture, width, height)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, width, height);
 
+    attachTexture(gl, gl.TEXTURE0, texture);
+
     gl.useProgram(program);
-    gl.uniform1i(uTexture, texture);
+    gl.uniform1i(uTexture, 0);
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.disable(gl.DEPTH_TEST);
