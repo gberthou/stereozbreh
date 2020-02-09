@@ -18,7 +18,8 @@ function voronoi_fragment(width, height)
         return sqrt(dx*dx + dy*dy);
     }
 
-    void main() {
+    void main()
+    {
         float sum = 0.;
         vec3 acc = vec3(0., 0., 0.);
         vec2 tmp = gl_FragCoord.xy / uDimensions;

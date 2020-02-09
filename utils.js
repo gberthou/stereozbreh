@@ -72,6 +72,12 @@ function createTexture(gl, width, height)
     return tex;
 }
 
+function attachTexture(gl, index, texture)
+{
+    gl.activeTexture(index);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+}
+
 function createFramebuffer(gl, texture)
 {
     const fb = gl.createFramebuffer();
@@ -101,7 +107,6 @@ function displayTexture(gl, texture, width, height)
     gl.viewport(0, 0, width, height);
 
     gl.useProgram(program);
-
     gl.uniform1i(uTexture, texture);
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);

@@ -228,7 +228,7 @@ function initDemo()
     const fb_height = 256;
 
     const pattern_width = 256;
-    const pattern_height = 600;
+    const pattern_height = 512;
 
     const textures = generate_depth_textures(context, fb_width, fb_height);
 
@@ -236,5 +236,7 @@ function initDemo()
     context.gl.viewport(0, 0, context.width, context.height);
     
     const pattern_texture = voronoi_draw(context.gl, pattern_width, pattern_height, 8, 16);
-    fast_draw_texture(context, pattern_texture, pattern_texture);
+    //fast_draw_texture(context, pattern_texture, pattern_texture);
+
+    stereo(gl, context.width, context.height, pattern_texture, textures);
 }
