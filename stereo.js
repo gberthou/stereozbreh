@@ -6,11 +6,23 @@ function stereo_fcode(width, height)
     uniform sampler2D pattern_texture;
     uniform sampler2D depth_texture;
 
+    float depth_to_perturbation(float depth)
+    {
+        return depth;
+    }
+
     void main()
     {
         vec2 p = gl_FragCoord.xy / vec2(` + width.toFixed(1) + `, ` + height.toFixed(1) + `);
-        vec2 fetch = vec2(p.x*2., p.y);
+        vec2 fetch = vec2(p.x*5., p.y);
 
+        if(fetch.x >= 1.)
+        {
+            vec2 local = vec2(fetch.x - 1., fetch.y);
+            float depth = texture2D(depth_texture, local).x;
+
+            fetch.x += depth_to_perturbation(depth);
+        }
         gl_FragColor = texture2D(pattern_texture, fetch);
     }
     `;
