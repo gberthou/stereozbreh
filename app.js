@@ -228,7 +228,7 @@ function initDemo()
     context.gl.bindFramebuffer(context.gl.FRAMEBUFFER, null);
     context.gl.viewport(0, 0, context.width, context.height);
     
-    const pattern_texture = voronoi_draw(context.gl, pattern_width, pattern_height, 16, 32);
+    const pattern_texture = voronoi_draw(context.gl, pattern_width, pattern_height, 8, 32);
 
     stereo(gl, context.width, context.height, pattern_texture, textures);
 }

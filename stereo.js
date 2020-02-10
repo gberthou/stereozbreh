@@ -8,7 +8,7 @@ function stereo_fcode(width, height)
 
     float depth_to_perturbation(float depth)
     {
-        return depth;
+        return -depth * .3;
     }
 
     void main()
