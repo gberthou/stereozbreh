@@ -1,4 +1,4 @@
-function stereo_fcode(width, height)
+function stereo_fcode(width, height, k, attenuation)
 {
     return `
     precision highp float;
@@ -8,21 +8,21 @@ function stereo_fcode(width, height)
 
     float depth_to_perturbation(float depth)
     {
-        return -depth * .3;
+        return -depth * ` + attenuation.toFixed(3) + ` / ` + k.toFixed(3) + `;
     }
 
     void main()
     {
         vec2 p = gl_FragCoord.xy / vec2(` + width.toFixed(1) + `, ` + height.toFixed(1) + `);
-        vec2 fetch = vec2(p.x*5., p.y);
+        vec2 fetch = vec2(p.x * ` + k.toFixed(3) + `, p.y);
 
         if(fetch.x >= 1.)
         {
-            vec2 local = vec2(fetch.x - 1., fetch.y);
-            float depth = texture2D(depth_texture, local).x;
+            float depth = texture2D(depth_texture, fetch).x;
 
-            fetch.x += depth_to_perturbation(depth);
+            fetch.x += depth_to_perturbation(depth) * floor(fetch.x-1.);
         }
+
         gl_FragColor = texture2D(pattern_texture, fetch);
     }
     `;
@@ -38,7 +38,7 @@ function stereo_filter_texture(gl, texture)
 
 function stereo(gl, width, height, pattern_texture, depth_textures)
 {
-    const fcode = stereo_fcode(width, height);
+    const fcode = stereo_fcode(width, height, 4, .5);
     const program = loadShaders(gl, VCODE_SCREEN, fcode);
 
     const aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
