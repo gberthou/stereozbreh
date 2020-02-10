@@ -18,7 +18,8 @@ function stereo_fcode(width, height, k, attenuation)
 
         if(fetch.x >= 1.)
         {
-            float depth = texture2D(depth_texture, fetch).x;
+            float corrected_y = clamp(fetch.y * ` + k.toFixed(3) + ` - ` + ((k-1.)/2.).toFixed(3) + `, 0., 1.);
+            float depth = texture2D(depth_texture, vec2(fetch.x, corrected_y)).x;
 
             fetch.x += depth_to_perturbation(depth) * floor(fetch.x-1.);
         }
