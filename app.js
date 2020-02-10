@@ -13,7 +13,7 @@ const fragmentShaderText =
 [
 "void main()",
 "{",
-"    gl_FragColor = vec4((1. - gl_FragCoord.z) * vec3(1., 1., 1.), 1.);",
+"    gl_FragColor = vec4(gl_FragCoord.z * vec3(1., 1., 1.), 1.);",
 "}"
 ].join("\n");
 
@@ -157,7 +157,7 @@ function drawDepth(context, shader, x, y, z)
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
-    gl.clearColor(0, 0, 0, 1.0);
+    gl.clearColor(1.0, 1.0, 1.0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     gl.drawElements(gl.TRIANGLES, cubeIndices.length, gl.UNSIGNED_SHORT, 0);
@@ -229,7 +229,6 @@ function initDemo()
     context.gl.viewport(0, 0, context.width, context.height);
     
     const pattern_texture = voronoi_draw(context.gl, pattern_width, pattern_height, 16, 32);
-    fast_draw_texture(context, textures[0]);
 
     stereo(gl, context.width, context.height, pattern_texture, textures);
 }
