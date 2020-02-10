@@ -72,6 +72,14 @@ function createTexture(gl, width, height)
     return tex;
 }
 
+function createDepthTexture(gl, width, height)
+{
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, width, height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
+    return tex;
+}
+
 function attachTexture(gl, index, texture)
 {
     gl.activeTexture(index);

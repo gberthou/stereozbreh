@@ -54,6 +54,8 @@ function initGL()
         }
     }
 
+    _gl.getExtension('WEBGL_depth_texture');
+
     return {
         gl: _gl,
         width: parseInt(canvas.getAttribute("width"), 10),
@@ -142,9 +144,6 @@ function initScene(context, shader)
 
 	gl.useProgram(shader.program);
     gl.uniformMatrix4fv(shader.vMproj, false, projMatrix);
-
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LEQUAL);
 }
 
 function drawDepth(context, shader, x, y, z)
@@ -155,15 +154,13 @@ function drawDepth(context, shader, x, y, z)
     glMatrix.mat4.lookAt(viewMatrix, glMatrix.vec3.fromValues(x, y, z), glMatrix.vec3.fromValues(0, 0, 0), glMatrix.vec3.fromValues(0, 0, 1));
     gl.uniformMatrix4fv(shader.vMview, false, viewMatrix);
 
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
     gl.clearColor(0, 0, 0, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     gl.drawElements(gl.TRIANGLES, cubeIndices.length, gl.UNSIGNED_SHORT, 0);
-
-    //var pixels = new Uint8Array(4 * context.width * context.height);
-    //gl.readPixels(0, 0, context.width, context.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-
-    //return pixels;
 }
 
 function draw(context, shader, fb_width, fb_height)
@@ -184,15 +181,15 @@ function draw(context, shader, fb_width, fb_height)
         const fb_tex = createTexture(context.gl, fb_width, fb_height);
         const fb     = createFramebuffer(context.gl, fb_tex);
 
+        const depth_tex = createDepthTexture(context.gl, fb_width, fb_height);
+        context.gl.framebufferTexture2D(context.gl.FRAMEBUFFER, context.gl.DEPTH_ATTACHMENT, context.gl.TEXTURE_2D, depth_tex, 0);
+
         textures.push(fb_tex);
 
         context.gl.bindFramebuffer(context.gl.FRAMEBUFFER, fb);
         context.gl.viewport(0, 0, fb_width, fb_height);
 
         drawDepth(context, shader, x, y, Z);
-
-        //var pixels = drawDepth(context, shader, x, y, Z);
-        //console.log(pixels);
     }
 
     return textures;
@@ -202,11 +199,7 @@ function generate_depth_textures(context, fb_width, fb_height)
 {
     const shader = initShaders(context.gl);
     initScene(context, shader);
-
-    const textures = draw(context, shader, fb_width, fb_height);
-    console.log(textures);
-
-    return textures;
+    return draw(context, shader, fb_width, fb_height);
 }
 
 function fast_draw_texture(context, texture)
@@ -238,5 +231,5 @@ function initDemo()
     const pattern_texture = voronoi_draw(context.gl, pattern_width, pattern_height, 16, 32);
     fast_draw_texture(context, textures[0]);
 
-    //stereo(gl, context.width, context.height, pattern_texture, textures);
+    stereo(gl, context.width, context.height, pattern_texture, textures);
 }
