@@ -1,30 +1,37 @@
-function stereo_fcode(width, height, k, attenuation)
+function stereo_fcode(width, height, attenuation, N)
 {
+    const k = N+1;
     return `
     precision highp float;
 
     uniform sampler2D pattern_texture;
-    uniform sampler2D depth_texture;
+    uniform sampler2D depth_texture[` + N.toString() + `];
 
     float depth_to_perturbation(float depth)
     {
         return -depth * ` + attenuation.toFixed(3) + ` / ` + k.toFixed(3) + `;
     }
 
+    float compute_perturbation(float x, float y)
+    {
+        float p = 0.;
+        for(int i = 1; i <= ` + N.toString() + `; ++i)
+        {
+            float depth = texture2D(depth_texture[i-1], vec2(x, y)).x;
+            p += (i > int(floor(x)) ? 0. : depth_to_perturbation(depth));
+        }
+        return p;
+    }
+
     void main()
     {
         vec2 p = gl_FragCoord.xy / vec2(` + width.toFixed(1) + `, ` + height.toFixed(1) + `);
-        vec2 fetch = vec2(p.x * ` + k.toFixed(3) + `, p.y);
+        float x = p.x * ` + k.toFixed(3) + `;
+        float y = clamp(p.y * ` + k.toFixed(3) + ` - ` + ((k-1.)/2.).toFixed(3) + `, 0., 1.);
 
-        if(fetch.x >= 1.)
-        {
-            float corrected_y = clamp(fetch.y * ` + k.toFixed(3) + ` - ` + ((k-1.)/2.).toFixed(3) + `, 0., 1.);
-            float depth = texture2D(depth_texture, vec2(fetch.x, corrected_y)).x;
+        x += compute_perturbation(x, y);
 
-            fetch.x += depth_to_perturbation(depth) * floor(fetch.x-1.);
-        }
-
-        gl_FragColor = texture2D(pattern_texture, fetch);
+        gl_FragColor = texture2D(pattern_texture, vec2(x, p.y));
     }
     `;
 }
@@ -39,7 +46,7 @@ function stereo_filter_texture(gl, texture)
 
 function stereo(gl, width, height, pattern_texture, depth_textures)
 {
-    const fcode = stereo_fcode(width, height, 4, .5);
+    const fcode = stereo_fcode(width, height, .5, depth_textures.length);
     const program = loadShaders(gl, VCODE_SCREEN, fcode);
 
     const aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
@@ -55,7 +62,7 @@ function stereo(gl, width, height, pattern_texture, depth_textures)
     stereo_filter_texture(gl, pattern_texture);
     for(var i = 0; i < depth_textures.length; ++i)
     {
-        attachTexture(gl, gl.TEXTURE1, depth_textures[i]);
+        attachTexture(gl, gl.TEXTURE1 + i, depth_textures[i]);
         stereo_filter_texture(gl, depth_textures[i]);
     }
 
@@ -63,7 +70,11 @@ function stereo(gl, width, height, pattern_texture, depth_textures)
 
     gl.useProgram(program);
     gl.uniform1i(uPattern, 0);
-    gl.uniform1i(uDepth, 1);
+
+    var indices = new Array(depth_textures.length);
+    for(var i = 0; i < depth_textures.length; ++i)
+        indices[i] = i+1;
+    gl.uniform1iv(uDepth, indices);
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.disable(gl.DEPTH_TEST);
